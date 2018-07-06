@@ -375,36 +375,24 @@ MESSAGE(\"When testing is complete, review test output in the
 MESSAGE(\" \")
 ")
 
-  FILE(GENERATE OUTPUT ${PROJECT_BINARY_DIR}/pcre_test.sh CONTENT
-  "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcretest=$<TARGET_FILE:pcretest>
-cd $<TARGET_FILE_DIR:pcretest>
-. ${PROJECT_SOURCE_DIR}/RunTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-")
-
   IF(UNIX)
-    ADD_TEST(pcre_test      sh ${PROJECT_BINARY_DIR}/pcre_test.sh)
+    ADD_TEST(NAME pcre_test
+      COMMAND sh pcre_test.sh
+        ${PROJECT_SOURCE_DIR}
+        $<TARGET_FILE:pcretest>
+        $<TARGET_FILE_DIR:pcretest>
+      )
   ENDIF(UNIX)
 
   IF(PCRE_BUILD_PCREGREP)
-    FILE(GENERATE OUTPUT ${PROJECT_BINARY_DIR}/pcre_grep_test.sh CONTENT
-    "#! /bin/sh
-# This is a generated file.
-srcdir=${PROJECT_SOURCE_DIR}
-pcregrep=$<TARGET_FILE:pcregrep>
-pcretest=$<TARGET_FILE:pcretest>
-cd $<TARGET_FILE_DIR:pcretest>
-. ${PROJECT_SOURCE_DIR}/RunGrepTest
-if test \"$?\" != \"0\"; then exit 1; fi
-# End
-")
-
     IF(UNIX)
-      ADD_TEST(pcre_grep_test sh ${PROJECT_BINARY_DIR}/pcre_grep_test.sh)
+      ADD_TEST(NAME pcre_grep_test
+        COMMAND sh pcre_grep_test.sh
+          ${PROJECT_SOURCE_DIR}
+          $<TARGET_FILE:pcregrep>
+          $<TARGET_FILE:pcretest>
+          $<TARGET_FILE_DIR:pcretest>
+        )
     ENDIF(UNIX)
   ENDIF(PCRE_BUILD_PCREGREP)
 
@@ -413,20 +401,12 @@ if test \"$?\" != \"0\"; then exit 1; fi
     FILE(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR} winsrc)
     FILE(TO_NATIVE_PATH ${PROJECT_BINARY_DIR} winbin)
 
-    FILE(GENERATE OUTPUT ${PROJECT_BINARY_DIR}/pcre_test.bat CONTENT
-    "\@REM This is a generated file.
-\@echo off
-setlocal
-SET srcdir=\"${winsrc}\"
-SET pcretest=\"$<TARGET_FILE:pcretest>\"
-if not [%CMAKE_CONFIG_TYPE%]==[] SET pcretest=\"${winbin}\\%CMAKE_CONFIG_TYPE%\\pcretest.exe\"
-call %srcdir%\\RunTest.Bat
-if errorlevel 1 exit /b 1
-echo RunTest.bat tests successfully completed
-")
-
   ADD_TEST(NAME pcre_test_bat
-  COMMAND pcre_test.bat)
+    COMMAND pcre_test.bat
+      ${winsrc}
+      ${winbin}
+      $<TARGET_FILE:pcretest>
+    )
   SET_TESTS_PROPERTIES(pcre_test_bat PROPERTIES
   PASS_REGULAR_EXPRESSION "RunTest\\.bat tests successfully completed")
 

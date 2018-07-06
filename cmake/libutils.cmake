@@ -194,22 +194,15 @@ MACRO(MERGE_STATIC_LIBS TARGET OUTPUT_NAME LIBS_TO_MERGE)
       # Generic Unix, Cygwin or MinGW. In post-build step, call
       # script, that extracts objects from archives with "ar x" 
       # and repacks them with "ar r"
-      SET(TARGET ${TARGET})
-      FILE(GENERATE
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/merge_archives_${TARGET}.cmake 
-        CONTENT "# Generated file
-SET(TARGET_LOCATION \"$<TARGET_FILE:${TARGET}>\")
-SET(TARGET \"${TARGET}\")
-SET(STATIC_LIBS \"${STATIC_LIBS}\")
-SET(CMAKE_CURRENT_BINARY_DIR \"${CMAKE_CURRENT_BINARY_DIR}\")
-SET(CMAKE_AR \"${CMAKE_AR}\")
-SET(CMAKE_RANLIB \"${CMAKE_RANLIB}\")
-INCLUDE(${MYSQL_CMAKE_SCRIPT_DIR}/merge_archives_unix.cmake)
-")
       ADD_CUSTOM_COMMAND(TARGET ${TARGET} POST_BUILD
-        COMMAND rm $<TARGET_FILE:${TARGET}>
-        COMMAND ${CMAKE_COMMAND} -P 
-        ${CMAKE_CURRENT_BINARY_DIR}/merge_archives_${TARGET}.cmake
+        COMMAND ${CMAKE_COMMAND}
+          -DTARGET_LOCATION="$<TARGET_FILE:${TARGET}>"
+          -DTARGET="${TARGET}"
+          -DSTATIC_LIBS="${STATIC_LIBS}"
+          -DCMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+          -DCMAKE_AR="${CMAKE_AR}"
+          -DCMAKE_RANLIB="${CMAKE_RANLIB}"
+          -P "${MYSQL_CMAKE_SCRIPT_DIR}/merge_archives_unix.cmake"
       )
     ENDIF()
   ENDIF()

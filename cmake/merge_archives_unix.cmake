@@ -14,9 +14,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+FILE(REMOVE "${TARGET_LOCATION}")
+
 SET(TEMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/merge_archives_${TARGET})
 MAKE_DIRECTORY(${TEMP_DIR})
 # Extract each archive to its own subdirectory(avoid object filename clashes)
+SEPARATE_ARGUMENTS(STATIC_LIBS UNIX_COMMAND "${STATIC_LIBS}")
 FOREACH(LIB ${STATIC_LIBS})
   GET_FILENAME_COMPONENT(NAME_NO_EXT ${LIB} NAME_WE)
   SET(TEMP_SUBDIR ${TEMP_DIR}/${NAME_NO_EXT})
